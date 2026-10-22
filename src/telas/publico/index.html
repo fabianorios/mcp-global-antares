@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Global Antares — consulta somente leitura</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="casca">
+    <aside class="lateral">
+      <p class="marca">Global Antares</p>
+      <p class="selo">Somente leitura</p>
+      <nav aria-label="Telas">
+        <a href="#configuracao" data-navegar="configuracao">Configuração</a>
+        <a href="#solicitacao" data-navegar="solicitacao">Solicitação</a>
+        <a href="#retorno" data-navegar="retorno">Retorno</a>
+      </nav>
+    </aside>
+    <main>
+      <section id="tela-configuracao" data-tela="configuracao" aria-labelledby="titulo-configuracao">
+        <header class="cabeca">
+          <h1 id="titulo-configuracao">Configuração</h1>
+          <p>A conexão fica neste computador, num arquivo ignorado pelo git. A senha não entra no log.</p>
+        </header>
+        <form id="form-configuracao" class="cartao" autocomplete="off">
+          <div class="grade-campos">
+            <div class="campo">
+              <label for="servidor">Servidor <small>ANTARES_DB_SERVER</small></label>
+              <input id="servidor" name="ANTARES_DB_SERVER" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="campo">
+              <label for="porta">Porta <small>ANTARES_DB_PORT</small></label>
+              <input id="porta" name="ANTARES_DB_PORT" inputmode="numeric" autocomplete="off" value="1433">
+            </div>
+            <div class="campo">
+              <label for="banco">Banco <small>ANTARES_DB_DATABASE</small></label>
+              <input id="banco" name="ANTARES_DB_DATABASE" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="campo">
+              <label for="usuario">Usuário <small>ANTARES_DB_USER</small></label>
+              <input id="usuario" name="ANTARES_DB_USER" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="campo campo-largo">
+              <label for="senha">Senha <small>ANTARES_DB_PASSWORD</small></label>
+              <input id="senha" name="ANTARES_DB_PASSWORD" type="password" autocomplete="new-password">
+              <p id="senha-salva" class="nota" hidden>Uma senha já está salva. Deixe o campo em branco para mantê-la.</p>
+            </div>
+            <div class="campo">
+              <label for="criptografia">Criptografia TLS <small>ANTARES_DB_ENCRYPT</small></label>
+              <select id="criptografia" name="ANTARES_DB_ENCRYPT">
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="certificado">Confiar no certificado <small>ANTARES_DB_TRUST_SERVER_CERTIFICATE</small></label>
+              <select id="certificado" name="ANTARES_DB_TRUST_SERVER_CERTIFICATE">
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </div>
+          </div>
+          <div class="acoes">
+            <button type="submit">Salvar</button>
+            <button type="button" id="testar-conexao" class="secundario">Testar conexão</button>
+          </div>
+          <p id="status-configuracao" class="status" role="status"></p>
+        </form>
+      </section>
+
+      <section id="tela-solicitacao" data-tela="solicitacao" hidden aria-labelledby="titulo-solicitacao">
+        <header class="cabeca">
+          <h1 id="titulo-solicitacao">Solicitação</h1>
+          <p>Uma ação por vez. A consulta livre só aceita um único SELECT ou WITH…SELECT.</p>
+        </header>
+        <form id="form-solicitacao" class="cartao">
+          <fieldset>
+            <legend>Ação</legend>
+            <label class="opcao"><input type="radio" name="acao" value="listar" checked> Listar tabelas <span>esquema e nome, com filtro opcional</span></label>
+            <label class="opcao"><input type="radio" name="acao" value="descrever"> Descrever tabela <span>colunas, tipos e chaves</span></label>
+            <label class="opcao"><input type="radio" name="acao" value="localizar"> Localizar regras <span>catálogo: verba, regra, cálculo, transação, negócio e LPC</span></label>
+            <label class="opcao"><input type="radio" name="acao" value="consultar"> Consultar somente leitura <span>um SELECT ou WITH…SELECT; limite padrão 50, teto 200</span></label>
+          </fieldset>
+
+          <div id="campos-listar" class="bloco">
+            <label for="filtro">Filtro do nome</label>
+            <input id="filtro" autocomplete="off" placeholder="Opcional. Parte do nome da tabela.">
+          </div>
+          <div id="campos-descrever" class="bloco" hidden>
+            <div class="grade-campos">
+              <div class="campo">
+                <label for="tabela">Tabela</label>
+                <input id="tabela" autocomplete="off">
+              </div>
+              <div class="campo">
+                <label for="esquema">Esquema</label>
+                <input id="esquema" autocomplete="off" placeholder="Opcional">
+              </div>
+            </div>
+          </div>
+          <div id="campos-localizar" class="bloco" hidden>
+            <div class="grade-campos">
+              <div class="campo">
+                <label for="categoria">Categoria</label>
+                <select id="categoria">
+                  <option value="">Todas</option>
+                  <option value="verba">Verba</option>
+                  <option value="regra">Regra</option>
+                  <option value="calculo">Cálculo</option>
+                  <option value="transacao">Transação</option>
+                  <option value="lpc">LPC</option>
+                  <option value="negocio">Negócio</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="termo">Termo extra</label>
+                <input id="termo" autocomplete="off" placeholder="Opcional">
+              </div>
+            </div>
+          </div>
+          <div id="campos-consultar" class="bloco" hidden>
+            <label for="sql">SQL</label>
+            <textarea id="sql" rows="5" spellcheck="false" placeholder="SELECT ..."></textarea>
+            <label for="parametros">Parâmetros</label>
+            <textarea id="parametros" rows="3" spellcheck="false" placeholder='{ "id": 10 }'></textarea>
+            <label for="limite">Limite</label>
+            <input id="limite" type="number" min="1" max="200" value="50">
+          </div>
+
+          <p id="bloqueio-envio" class="alerta" hidden role="alert">Esta consulta não pode ser enviada. Use um único SELECT ou WITH…SELECT.</p>
+          <div class="acoes">
+            <button type="submit" id="executar">Executar</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="tela-retorno" data-tela="retorno" hidden aria-labelledby="titulo-retorno">
+        <header class="cabeca">
+          <h1 id="titulo-retorno">Retorno</h1>
+          <p>Colunas e linhas da última solicitação.</p>
+        </header>
+        <p id="aviso-exemplo" class="tarja" hidden>Exemplo local. Estas linhas não vieram de um banco Antares.</p>
+        <p id="aviso-retorno" class="nota-forte" hidden></p>
+        <div id="estado-erro" class="alerta" hidden role="alert"></div>
+        <div id="estado-vazio" class="vazio" hidden>
+          <p>Nenhuma linha para mostrar.</p>
+        </div>
+        <div id="estado-inicial" class="vazio">
+          <p>Nenhuma solicitação executada ainda.</p>
+        </div>
+        <div id="moldura-grade" class="moldura" hidden>
+          <table id="grade">
+            <caption>Resultado</caption>
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

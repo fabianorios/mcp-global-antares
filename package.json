@@ -1,0 +1,36 @@
+{
+  "name": "mcp-global-antares",
+  "version": "0.1.0",
+  "description": "MCP somente leitura para inspecionar o banco Apdata Global Antares (SQL Server).",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-global-antares": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "telas": "tsx src/telas/index.ts",
+    "test": "node --import tsx --test src/guarda-sql.test.ts src/config.test.ts src/ferramentas.test.ts src/servidor.test.ts src/telas/telas.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabianorios/mcp-global-antares.git"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "mssql": "^12.7.10",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "happy-dom": "^21.0.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
