@@ -11,6 +11,7 @@ Este recorte lista tabelas, descreve colunas e chaves, executa um único `SELECT
 - Não conhece os nomes físicos do dicionário Apdata. A busca de regras depende do esquema do cliente: até existir um banco de homologação confirmado, ela só pesquisa `sys.tables`, `sys.columns` e propriedades estendidas por padrões de nome (verba, regra, cálculo, transação, negócio, LPC).
 - Não conecta em Oracle nem em outro SGBD. Só SQL Server, pelo pacote `mssql`.
 - Não recebe senha em argumento de linha de comando.
+- As telas locais não abrem outro caminho de escrita: a solicitação passa pelo mesmo guard e pelas mesmas ferramentas.
 
 ## Login somente leitura
 
@@ -94,6 +95,28 @@ O guard rejeita outro comando, mais de um comando, `SELECT INTO`, `EXEC` e funç
 `localizar_regras` não consulta uma tabela física da Apdata. Este repositório não documenta esse dicionário, e a busca fica no catálogo até alguém confirmar o esquema num banco de homologação.
 
 O ponto de extensão está em `src/dicionario-confirmado.ts`. A lista começa vazia. Um item novo precisa da fonte que confirmou o nome e de um único `SELECT`. O servidor só o executa se o guard aceitar a consulta e se a tabela existir no catálogo da conexão.
+
+## Telas do consultor
+
+Há uma aplicação local, em português, só em `127.0.0.1`. O navegador não fala com o SQL Server. Quem consulta é este processo, com a mesma camada somente leitura do MCP.
+
+```bash
+npm run telas
+```
+
+Abre `http://127.0.0.1:4173/`. A porta pode mudar com `ANTARES_TELAS_PORT`.
+
+1. **Configuração** — servidor, porta, banco, usuário, senha, criptografia e confiança no certificado. Salvar grava `.antares/conexao.json` nesta máquina. Esse arquivo está no `.gitignore`. A senha não volta na resposta da API e não é escrita no log. **Testar conexão** usa o mesmo código de conexão e mostra sucesso ou o erro.
+2. **Solicitação** — uma ação: listar tabelas (filtro opcional), descrever tabela, localizar regras, ou consultar somente leitura. O limite padrão da consulta é 50 e o teto é 200. Um comando que não seja um único `SELECT` ou `WITH…SELECT` não é enviado.
+3. **Retorno** — grade com colunas e linhas, estado vazio, ou erro (conexão, rejeição do guard, tabela ausente).
+
+Para abrir as telas com linhas de exemplo, sem um banco Antares:
+
+```bash
+ANTARES_TELAS_FIXTURE=1 npm run telas
+```
+
+Nesse modo a solicitação não abre o SQL Server. **Testar conexão** continua usando a configuração salva e o código real de conexão.
 
 ## Desenvolvimento
 

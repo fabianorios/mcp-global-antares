@@ -4,7 +4,11 @@ import { classificarValor } from "./parametros.js";
 import { mensagemDe, redigirSegredo } from "./texto.js";
 import type { Banco, Linha, ValorParametro } from "./tipos.js";
 
-export function criarBancoDoAmbiente(env: NodeJS.ProcessEnv = process.env): Banco {
+export interface BancoSessao extends Banco {
+  encerrar(): Promise<void>;
+}
+
+export function criarBancoDoAmbiente(env: NodeJS.ProcessEnv = process.env): BancoSessao {
   let pool: ConnectionPool | undefined;
   let pendente: Promise<ConnectionPool> | undefined;
 
@@ -39,6 +43,12 @@ export function criarBancoDoAmbiente(env: NodeJS.ProcessEnv = process.env): Banc
       } catch (erro) {
         throw new Error(redigirSegredo(mensagemDe(erro), [config.senha]));
       }
+    },
+    async encerrar() {
+      const atual = pool;
+      pool = undefined;
+      pendente = undefined;
+      if (atual) await atual.close().catch(() => undefined);
     },
   };
 }

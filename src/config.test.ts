@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 import { lerConfigBanco, resumirConfig, variaveisObrigatorias } from "./config.js";
 import { redigirSegredo } from "./texto.js";
@@ -68,15 +70,26 @@ describe("lerConfigBanco", () => {
 
 describe("fontes", () => {
   it("não lê argumentos de linha de comando nem escreve em stdout", () => {
-    const arquivos = readdirSync(new URL(".", import.meta.url), { withFileTypes: true })
-      .filter((entrada) => entrada.isFile() && entrada.name.endsWith(".ts") && !entrada.name.endsWith(".test.ts"))
-      .map((entrada) => entrada.name);
-
-    assert.ok(arquivos.includes("index.ts"));
-    for (const nome of arquivos) {
-      const texto = readFileSync(new URL(nome, import.meta.url), "utf8");
-      assert.equal(texto.includes("process.argv"), false, nome);
-      assert.equal(texto.includes("console.log("), false, nome);
+    const raiz = fileURLToPath(new URL(".", import.meta.url));
+    const arquivos = listarFontes(raiz);
+    assert.ok(arquivos.some((arquivo) => arquivo.endsWith(`${join("src", "index.ts")}`) || arquivo.endsWith("index.ts")));
+    assert.ok(arquivos.some((arquivo) => arquivo.includes(`${join("telas", "index.ts")}`)));
+    for (const arquivo of arquivos) {
+      const texto = readFileSync(arquivo, "utf8");
+      assert.equal(texto.includes("process.argv"), false, arquivo);
+      assert.equal(texto.includes("console.log("), false, arquivo);
     }
   });
 });
+
+function listarFontes(diretorio: string): string[] {
+  const encontrados: string[] = [];
+  for (const entrada of readdirSync(diretorio, { withFileTypes: true })) {
+    const caminho = join(diretorio, entrada.name);
+    if (entrada.isDirectory()) encontrados.push(...listarFontes(caminho));
+    else if (entrada.isFile() && entrada.name.endsWith(".ts") && !entrada.name.endsWith(".test.ts")) {
+      encontrados.push(caminho);
+    }
+  }
+  return encontrados;
+}
